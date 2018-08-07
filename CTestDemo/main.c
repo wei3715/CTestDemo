@@ -166,6 +166,10 @@ int main(int argc, const char * argv[]) {
     //测试把结构体放到堆内存上
     void testMallocStruct(void);
     testMallocStruct();
+    
+    //测试宏定义的使用
+    void testDefine(void);
+    testDefine();
     return 0;
 }
 
@@ -497,6 +501,9 @@ void testMallocStruct(){
 
 //宏定义：在我们程序预处理阶段进行一个替换
 #define PI 3.1415926
+
+//取消某个宏定义
+//#undef PI
 #define NAME "ZWW"
 
 //含参
@@ -504,13 +511,26 @@ void testMallocStruct(){
 #define MAX(a,b) ((a)>(b)?(a):(b))
 
 //特殊标志符:
-// #字符串处理符
+//参数名前加上#做字符串处理
 #define String(a) #a
 
-// ##字符串连接符
-#define MyFunc(name)   void name##Init();
+// ##：字符串连接符
+#define MyFunc(name) void name##Init(void);
 
-MyFunc(<#name#>)
+// \:行连接符
+#define HelloGirl(name) void name##Func(void){ \
+ \
+ printf("测试反斜杠行连接符的使用\n"); \
+}
+
+//声明一个函数
+MyFunc(person)
+//实现
+void personInit(){
+    printf("测试##字符串连接符\n");
+}
+
+HelloGirl(zww)
 
 //测试宏定义
 void testDefine(){
@@ -521,7 +541,53 @@ void testDefine(){
     printf("自定义含参数宏sum(a,b)==%d, MAX(a,b)==%f\n",sum(10, 20),MAX(37.8, 2.34));
     
     printf("使用#，不用使用双引号修饰参数==%s\n",String(haha)); //不用String("haha")
-    
-    printf("使用##，不用使用双引号修饰参数==%s\n",String(haha)); //MyFunc(person)  就等价于 void personInit();
-    
+    personInit();
+    zwwFunc();
+}
+
+//测试编译
+void testGCCCompile(){
+    /**
+     xcode只是一个人性化的编辑代码工具
+     主要通过终端命令行的形式来验证GCC预编译-编译-汇编-连接等各过程生成的文件
+     gcc -v 查看gcc的版本号，看是否已安装gcc
+     1.vi hello.c  //编辑文件
+     2.点击i进入输入模式
+     #include <stdio.h>
+     int main(int argv, const char * argc[]){
+     printf("hello gcc!\n");
+     return 0;
+     }
+     
+     3.查看 cat hello.c
+     3.1带有代码行的查看方式： cat -n hello.c
+     4 执行 ./hello
+     
+     预编译阶段（处理宏定义指令（替换），条件编译指令，头文件包含指令）
+     一步到位的编译指令（将原文件直接输出一个可执行文件）：
+     1.1命令行： gcc hello.c -o hello
+     会生成hello.c 的可执行文件hello
+     
+     一：第一步预处理指令（生成预处理文件）
+     命令行： gcc - E hello.c -o hello.i
+     会生成hello.c 对应的预处理文件 hello.i
+     查看某个函数的过滤命令行：（grep是搜索含有关键字printf的意思）
+     cat -n hello.i | grep printf
+     
+     二：编译（生成汇编代码,一些指令集合）
+     命令行：
+     gcc - S hello.i -o hell.s
+     
+     我们C语言编译好的文件，运行时变量，代码等占用不同的内存分区，这个内存分区的决定就在我们编译好生成的这个汇编里面的指令划分一个段，比如有代码段，数据段，堆栈段、主要由我们汇编语言指令决定
+     
+     三：汇编（生成输出文件，把汇编代码翻译成机器码0101）
+
+     命令行：
+     gcc -c hello.s -o hello.o
+     
+     四：连接器(把汇编器输出的很多文件和需要的库文件连接成一个文件)
+     命令行：
+     gcc hello.o -o hello
+     
+     */
 }
